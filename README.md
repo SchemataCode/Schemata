@@ -54,4 +54,4 @@ element isbn {
 
 ```
 
-This schema file first says that there is a possible root XML element <books>.
+This schema file first says that there is a possible root XML element &lt;books&gt;.
