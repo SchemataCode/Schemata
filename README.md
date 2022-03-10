@@ -61,3 +61,7 @@ This schema file first says that there is a possible root XML element `<books>`.
 The second block defines the `<book>` element. This element must have an attribute `id`. It must also have `<title>` and `<isbn>` subelements. It can also have a `<subtitle>` subelement, but as you can see, this is optional. The square brackets indicate that these subelements must appear in the order shown.
 
 The third block defines the `id` attribute. 
+
+## Credits
+
+Made by B. T. Milnes for Nagwa Limited
