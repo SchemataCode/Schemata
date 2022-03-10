@@ -28,7 +28,7 @@ root element books {
 
 element book {
     attributes: id;
-    allowedContent: title, subtitle (optional), isbn;
+    allowedContent: [ title, subtitle (optional), isbn ];
 }
 
 attribute id {
@@ -54,4 +54,8 @@ element isbn {
 
 ```
 
-This schema file first says that there is a possible root XML element &lt;books&gt;.
+This schema file first says that there is a possible root XML element `&lt;books&gt;`. This element may then have any number n >= 0 of `&lt;book&gt;` elements as subelements.
+
+The second block defines the `&lt;book&gt;` element. This element must have an attribute `id`. It must also have `<title>` and `<isbn>` subelements. It can also have a `<subtitle>` subelement, but as you can see, this is optional. The square brackets indicate that these subelements must appear in the order shown.
+
+The third block defines the `id` attribute. 
