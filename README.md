@@ -14,6 +14,8 @@ While Schemata was originally designed for XML schemas, it became apparent that 
 
 This code library does not actually _perform_ the validation of an XML or JSON file against the schema itself. Instead, this code library generates an XSD or JSON Schemas file that can be used for validation. The validation can then be _performed_ by any number of standard libraries. This has the advantage that the code library is easy to maintain, and its output is portable.
 
+This code library can also generate documentation for an XML format based on the Schemata file. This documentation is not _quite_ perfect - there will always be nuances in how an XML format is used that cannot be accounted for in the schema - but generating the documentation from the Schemata file and then editing it can be **a lot** quicker than writing the whole thing manually.
+
 ## Principles of Design
 
 A Schemata file defines a number of **structures**. These structures are used to describe different things within an XML file - elements, attributes, data - or a JSON file - objects, properties, arrays, data. Structures can in turn refer to other structures that they contain.
@@ -54,8 +56,8 @@ element isbn {
 
 ```
 
-This schema file first says that there is a possible root XML element `&lt;books&gt;`. This element may then have any number n >= 0 of `&lt;book&gt;` elements as subelements.
+This schema file first says that there is a possible root XML element `<books>`. This element may then have any number n >= 0 of `<book>` elements as subelements.
 
-The second block defines the `&lt;book&gt;` element. This element must have an attribute `id`. It must also have `<title>` and `<isbn>` subelements. It can also have a `<subtitle>` subelement, but as you can see, this is optional. The square brackets indicate that these subelements must appear in the order shown.
+The second block defines the `<book>` element. This element must have an attribute `id`. It must also have `<title>` and `<isbn>` subelements. It can also have a `<subtitle>` subelement, but as you can see, this is optional. The square brackets indicate that these subelements must appear in the order shown.
 
 The third block defines the `id` attribute. 
