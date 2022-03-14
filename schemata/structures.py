@@ -1,4 +1,3 @@
-
 import logging 
 
 logger = logging.getLogger(__name__)
@@ -6,6 +5,22 @@ logger.setLevel(logging.INFO)
 
 
 class Schema(object):
+    """
+    Represents a schema.
+
+    ...
+
+    Attributes
+    ----------
+    formatName : str
+        the name of this XML or JSON format
+    structures : list
+        the structures in this format
+    dependencies : list
+        the schemas on which this schema depends, if any
+    
+    """
+
     def __init__(self):
         self.formatName = ""
         self.structures = []
@@ -16,38 +31,125 @@ class Schema(object):
         return [structure for dependency in self.dependencies for structure in dependency.structures] + self.structures 
 
     def getStructureByReference(self, reference):
+        """
+        Gets the structure with the given reference.
+
+        Parameters
+        ----------
+        reference : str
+            the reference of the structure to get
+
+        Returns
+        -------
+        Either the structure with the given reference, or None if none is found.
+        
+        """
+
         d = {structure.reference : structure for structure in self._allStructures}
 
         return d.get(reference, None)
 
     def getDataStructures(self):
+        """
+        Gets all of the data structures in this schema.
+
+        Returns
+        -------
+        A list of data structures.
+        """
+
         return [structure for structure in self._allStructures if isinstance(structure, DataStructure)]
 
     def getAttributeStructures(self):
+        """
+        Gets all of the XML attribute structures in this schema.
+
+        Returns
+        -------
+        A list of attribute structures.
+        """
+
         return [structure for structure in self._allStructures if isinstance(structure, AttributeStructure)]
 
     def getElementStructures(self):
+        """
+        Gets all of the XML element structures in this schema.
+
+        Returns
+        -------
+        A list of element structures.
+        """
+
         return [structure for structure in self._allStructures if isinstance(structure, ElementStructure)]
 
     def getRootElementStructures(self):
+        """
+        Gets all of the XML root element structures in this schema.
+
+        Returns
+        -------
+        A list of element structures.
+        """
+
         return [structure for structure in self.getElementStructures() if structure.canBeRootElement]
 
     def getNonRootElementStructures(self):
+        """
+        Gets all of the XML non-root element structures in this schema.
+
+        Returns
+        -------
+        A list of element structures.
+        """
+
         return [structure for structure in self.getElementStructures() if not structure.canBeRootElement]
 
     def getObjectStructures(self):
+        """
+        Gets all of the JSON object structures in this schema.
+
+        Returns
+        -------
+        A list of object structures.
+        """
+
         return [structure for structure in self._allStructures if isinstance(structure, ObjectStructure)]
 
     def getRootObjectStructures(self):
+        """
+        Gets all of the JSON root object structures in this schema.
+
+        Returns
+        -------
+        A list of object structures.
+        """
+
         return [structure for structure in self.getObjectStructures() if structure.canBeRootObject]
 
     def setIsUsed(self):
+        """
+        Sets the isUsed property for every structure in the schema. This property determines whether or not a structure 
+        will appear in the exported schema format, so this function must be called by the exporter at some point.
+
+        Returns
+        -------
+        None
+        """
+
         rootElementStructures = self.getRootElementStructures()
 
         for rootElementStructure in rootElementStructures:
             rootElementStructure.setIsUsed()
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+
         return {
             "formatName": self.formatName,
             "structures": [structure.toJSON() if hasattr(structure, "toJSON") else structure for structure in self.structures]
