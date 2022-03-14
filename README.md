@@ -4,7 +4,7 @@ Schemata is a file format that makes it easier to create schemas for XML and JSO
 
 ## Motivation
 
-Schemata was created because many of the existing formats for XML schema are verbose. Among these is XSD. The XSD format, while flexible, requires a lot of mark-up (because it is an XML format) and is difficult to read. XSD files can easily become very large, and very disordered. This makes them difficult and tedious to maintain.
+Schemata was created because many of the existing formats for XML schema are verbose. Among these is XSD. XSD, while flexible, requires a lot of mark-up (because it is an XML format) and is difficult to read. XSD files can easily become very large, and very disordered. This makes them difficult and tedious to maintain.
 
 The Schemata format uses minimal, intuitive mark-up, making it easy to read and maintain. This is particularly useful when creating and maintaining schemas for multiple complex formats. 
 
@@ -14,7 +14,7 @@ While Schemata was originally designed for XML schemas, it became apparent that 
 
 This code library does not actually _perform_ the validation of an XML or JSON file against the schema itself. Instead, this code library generates an XSD or JSON Schemas file that can be used for validation. The validation can then be _performed_ by any number of standard libraries. This has the advantage that the code library is easy to maintain, and its output is portable.
 
-This code library can also generate documentation for an XML format based on the Schemata file. This documentation is not _quite_ perfect - there will always be nuances in how an XML format is used that cannot be accounted for in the schema - but generating the documentation from the Schemata file and then editing it can be **a lot** quicker than writing the whole thing manually.
+This code library can also generate documentation for an XML or JSON format based on the Schemata file. This documentation is not _quite_ perfect - there will always be nuances in how an XML or JSON format is used that cannot be accounted for in the schema - but generating the documentation from the Schemata file and then editing it can be **a lot** quicker than writing the whole thing manually.
 
 ## An Introduction to the Syntax
 
@@ -43,16 +43,16 @@ Let's start by considering a very simple XML file.
 
 This XML file contains a list of books, with some basic information about each book. We can call this XML format Book List XML.
 
-In writing a schema for Book List XML, we might start by defining the root element `<books>`, which we can do in Schemata as below.
+In writing a schema for Book List XML, we might start by defining the root element `<books>`, which we can do in Schemata syntax as below.
 
 ```
 root element books {
 }
 ```
 
-This code block tells us that in Book List XML there can be an element `<books>`, and that this element can be a root element of the document. We haven't said anything about the contents of this element yet, because we haven't defined any other elements in our Schemata file.
+This code block states that in Book List XML there can be an element `<books>`, and that this element can be a root element of the document. We haven't said anything about the contents of this element yet, because we haven't defined any other elements in our Schemata file.
 
-Note that the string that appears after `root element` in the code block above defines both the _reference_ to this structure in the Schemata file (the name by which this element is referred to in the rest of the Schemata file), and the _tag name_ of the XML element. These two things can be set differently, as shown below.
+Note that the string that appears after `root element` in the code block above defines both the _reference_ to this structure in the Schemata file (the name by which this structure is referred to in the rest of the Schemata file), and the _tag name_ of the XML element. These two things can be set differently, as shown below.
 
 ```
 root element my_root_element {
@@ -60,9 +60,9 @@ root element my_root_element {
 }
 ```
 
-This code block still tells us that in Book List XML there can be a root element `<books>`, but if we need to refer to it elsewhere in the Schemata file, it will be referred to as `my_root_element`. (Most of the time you won't want to have the reference and the tag name be different - it's only when schemas get much more complicated that you might need to.)
+This code block still states that in Book List XML there can be a root element `<books>`, but if we need to refer to it elsewhere in the Schemata file, it will be referred to as `my_root_element`. (Most of the time you won't want to have the reference and the tag name be different - it's only when schemas get much more complicated that you might need to.)
 
-We now want to define an element `<book>` that has an `id` attribute. We need to first define the `id` attribute, which we can do in Schemata as below.
+We now want to define an element `<book>` that has an `id` attribute. We need to first define the `id` attribute, which we can do in Schemata syntax as below.
 
 ```
 attribute id {
@@ -70,7 +70,7 @@ attribute id {
 }
 ```
 
-This code block tells us that in Book List XML there can be an attribute `id`, the value of which can be any string. We can now define the `<book>` element.
+This code block states that in Book List XML there can be an attribute `id`, the value of which can be any string. We can now define the `<book>` element.
 
 ```
 element book {
@@ -78,7 +78,7 @@ element book {
 }
 ```
 
-This code block tells us that in Book List XML there can be an element `<book>`, which has an attribute `id`.
+This code block states that in Book List XML there can be an element `<book>`, which has an attribute `id`. (In this case it is a required attribute.)
 
 Now we want to say that this `<book>` element can be a subelement of the `<books>` element. In order to do this, we need to adjust the first code block we wrote, as below.
 
@@ -88,7 +88,7 @@ root element books {
 }
 ```
 
-This code block now tells us that the `<books>` element can have `<book>` subelements. The expression `n >= 0` indicates that there can be any number of `<book>` subelements, including zero. (That wouldn't be a very useful file, but we'll allow it.) The square brackets in the `allowedContent` property indicate that the subelements must appear in the order defined. This doesn't really matter in this case, as only one type of subelement - the `<book>` subelement - can exist. This becomes more useful when an element can have many different types of subelement (as we shall see later).
+This code block now states that the `<books>` element can have `<book>` subelements. The expression `n >= 0` indicates that there can be any number of `<book>` subelements, including zero. (That wouldn't be a very useful file, but we'll allow it.) The square brackets in the `allowedContent` property indicate that the subelements must appear in the order defined. This doesn't really matter in this case, as only one type of subelement - the `<book>` subelement - can exist. This becomes more useful when an element can have many different types of subelement (as we shall see later).
 
 So far we have
 
@@ -106,7 +106,7 @@ element book {
 }
 ```
 
-At this point it's worth mentioning that we can be more specific with what values things like attributes can have. In Schemata, it's possible to define new data types. This can be very useful, as often you will want to use the same data type in many places in your schema, but you will want to define it in one place and reuse it everywhere.
+At this point it's worth mentioning that we can be more specific with what values things like attributes can have. This can be done through data types.
 
 In our example XML file above, we can see that the ids of the books always consist of letters, numbers, and underscores - never spaces, hyphens, apostrophes, et cetera. We can define a new data type in Schemata as below.
 
@@ -226,11 +226,15 @@ element isbn {
 
 This schema, when put through the Schemata code, would produce an XSD file that describes the XML file we started with.
 
+There are many features which have not been covered in this introduction. 
+
+## Principles of Design
+
+The ease-of-reading and intuitiveness of the Schemata syntax should be apparent. The syntax is superficially similar to that of CSS, which many developers are familiar with. Much of the 'heavy-lifting' of the mark-up is done by brackets, colons, and semi-colons, as opposed to opening and closing XML tags.
+
+Schemata is based around the concept of **structures**. XML schemas can be defined in terms of element, attribute, and data structures. JSON schemas can be defined in terms of object, property, array, and data structures.
 
 
-
-
-A Schemata file defines a number of **structures**. These structures are used to describe different things within an XML file - elements, attributes, data - or a JSON file - objects, properties, arrays, data. Structures can in turn refer to other structures that they contain.
 
 
 ## Credits
