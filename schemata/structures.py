@@ -744,6 +744,17 @@ class ObjectStructure(Structure):
 
 
 class UsageReference(object):
+    """
+    A usage reference base class. While structures *define* things like elements or objects, usage references are statements of how and where they are used.
+    A usage reference includes things like whether an attribute is optional, or how many times a subelement should be repeated.
+
+    ...
+
+    Attributes
+    ----------
+    schema : Schema
+        the schema that this usage reference is used in.
+    """
     def __init__(self):
         self.schema = None 
 
@@ -755,6 +766,18 @@ class UsageReference(object):
 
 
 class DataUsageReference(UsageReference):
+    """
+    A class for a data structure usage reference.
+
+    ...
+
+    Attributes
+    ----------
+    dataStructureReference : string
+        the reference of the data structure that this usage reference pertains to
+    dataStructure : DataStructure
+        the data structure that this usage reference pertains to
+    """
     def __init__(self):
         super().__init__()
 
@@ -765,16 +788,49 @@ class DataUsageReference(UsageReference):
         return self.schema.getStructureByReference(self.dataStructureReference)
 
     def setIsUsed(self):
+        """
+        Sets the isUsed property for the structures this usage reference depends on.
+
+        Returns
+        -------
+        None 
+        """
+
         if self.dataStructure != None:
             self.dataStructure.setIsUsed()
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+
         return {
             "dataStructureReference": self.dataStructureReference
         }
 
 
 class AttributeUsageReference(UsageReference):
+    """
+    A class for an attribute structure usage reference.
+
+    ...
+
+    Attributes
+    ----------
+    attributeStructureReference : string
+        the reference of the attribute structure this usage reference pertains to
+    attributeStructure : AttributeStructure
+        the attribute structure this usage reference pertains to
+    isOptional : boolean
+        whether or not this attribute is optional in this context
+    defaultValue : any
+        the default value of this attribute in this context; overrides the default value set by the attribute structure and the default value set by the value data structure
+    """
+
     def __init__(self):
         super().__init__()
 
@@ -787,10 +843,26 @@ class AttributeUsageReference(UsageReference):
         return self.schema.getStructureByReference(self.attributeStructureReference)
 
     def setIsUsed(self):
+        """
+        Sets the isUsed property for the structures this usage reference depends on.
+
+        Returns
+        -------
+        None 
+        """
+
         if self.attributeStructure != None:
             self.attributeStructure.setIsUsed()
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+
         return {
             "attributeStructureReference": self.attributeStructureReference,
             "isOptional": self.isOptional,
@@ -799,6 +871,24 @@ class AttributeUsageReference(UsageReference):
 
 
 class ElementUsageReference(UsageReference):
+    """
+    A class for an element structure usage reference.
+
+    ...
+
+    Attributes
+    ----------
+    elementStructureReference : string
+        the reference of the element structure that this usage reference pertains to
+    elementStructure : ElementStructure
+        the element structure that this usage reference pertains to
+    nExpression : array of tuples
+        an array of tuples defining the limits of how many repeats of this element there should be
+    minimumNumberOfOccurrences : integer
+        the minimum number of occurrences (inclusive) that there must be of this element
+    maximumNumberOfOccurrences : integer
+        the maximum number of occurrences (inclusive) that there must be of this element
+    """
     def __init__(self):
         super().__init__()
 
@@ -812,18 +902,51 @@ class ElementUsageReference(UsageReference):
         return self.schema.getStructureByReference(self.elementStructureReference)
 
     def setIsUsed(self):
+        """
+        Sets the isUsed property for the structures this usage reference depends on.
+
+        Returns
+        -------
+        None 
+        """
+
         if self.elementStructure != None:
             self.elementStructure.setIsUsed()
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+
         return {
             "elementStructureReference": self.elementStructureReference,
             "minimumNumberOfOccurrences": self.minimumNumberOfOccurrences,
-            "maximumNumberOfOccurrences":self.maximumNumberOfOccurrences
+            "maximumNumberOfOccurrences": self.maximumNumberOfOccurrences
         }
 
 
 class PropertyUsageReference(UsageReference):
+    """
+    A class for a property structure usage reference.
+
+    ...
+
+    Attributes
+    ----------
+    propertyStructureReference : string
+        the reference of the property structure that this usage reference pertains to
+    propertyStructure : PropertyStructure
+        the property structure that this usage reference pertains to
+    isOptional : boolean
+        whether this property is optional in this context
+    defaultValue : any
+        the default value of this property in this context
+    """
+
     def __init__(self):
         super().__init__()
 
@@ -836,10 +959,26 @@ class PropertyUsageReference(UsageReference):
         return self.schema.getStructureByReference(self.propertyStructureReference)
 
     def setIsUsed(self):
+        """
+        Sets the isUsed property for the structures this usage reference depends on.
+
+        Returns
+        -------
+        None 
+        """
+
         if self.propertyStructure != None:
             self.propertyStructure.setIsUsed()
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+
         return {
             "propertyStructureReference": self.propertyStructureReference,
             "isOptional": self.isOptional,
@@ -848,22 +987,51 @@ class PropertyUsageReference(UsageReference):
 
 
 class AnyAttributesUsageReference(UsageReference):
+    """
+    A class for a wildcard usage reference that indicates that any attributes can be attached to an element.
+    """
     pass 
 
 
 class AnyElementsUsageReference(UsageReference):
+    """
+    A class for a wildcard usage reference that indicates that any element can be a subelement of an element.
+    """
     pass 
 
 
 class AnyTextUsageReference(UsageReference):
+    """
+    A class for a wildcard usage reference that indicates any text can be contained within an element.
+    """
     pass 
 
 
 class AnyPropertiesUsageReference(UsageReference):
+    """
+    A class for a wildcard usage reference that indicates that any properties can be attached to an object.
+    """
     pass 
 
 
 class StructureList(object):
+    """
+    Represents a list of structures usage references. This is used in the allowedContent property of the ElementStructure class.
+
+    This is the base class. Derived classes specify whether the structures must appear in order, or whether the list represents a choice between structures.
+
+    ...
+
+    Attributes
+    ----------
+    schema : Schema
+        the schema that this structure list is in
+    structures : list
+        the structure usage references in this list
+    containsText : boolean
+        whether this structure list contains an AnyTextUsageReference, at any level of depth
+    """
+
     def __init__(self):
         self.schema = None 
 
@@ -894,6 +1062,14 @@ class StructureList(object):
                     return True 
 
     def setIsUsed(self):
+        """
+        Sets the isUsed property for the structures this list depends on.
+
+        Returns
+        -------
+        None 
+        """
+
         for structureUsageReference in self.structures:
             structureUsageReference.setIsUsed()
 
@@ -902,8 +1078,19 @@ class StructureList(object):
 
 
 class UnorderedStructureList(StructureList):
+    """
+    Represents a type of structure list where the order is not important.
+    """
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+
         return {
             "type": "UnorderedStructureList",
             "structures": [structure.toJSON() for structure in self.structures]
@@ -911,8 +1098,19 @@ class UnorderedStructureList(StructureList):
 
 
 class OrderedStructureList(StructureList):
+    """
+    Represents a type of structure list where the order is important.
+    """
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+
         return {
             "type": "OrderedStructureList",
             "structures": [structure.toJSON() for structure in self.structures]
@@ -920,8 +1118,19 @@ class OrderedStructureList(StructureList):
 
 
 class StructureChoice(StructureList):
+    """
+    Represents a type of structure list where only one of the structures can be used.
+    """
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+        
         return {
             "type": "StructureChoice",
             "structures": [structure.toJSON() for structure in self.structures]
