@@ -157,11 +157,33 @@ class Schema(object):
 
 
 class StructureMetadata(object):
+    """
+    Captures the metadata for a structure. The metadata is used in automatic documentation generation.
+
+    ...
+
+    Attributes
+    ----------
+    description : str
+        a description of this structure
+    exampleValue : str
+        an example value for this structure, if relevant
+
+    """
+
     def __init__(self):
         self.description = ""
         self.exampleValue = ""
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+
         return {
             "description": self.description,
             "exampleValue": self.exampleValue
@@ -169,6 +191,26 @@ class StructureMetadata(object):
 
 
 class Structure(object):
+    """
+    A base class for all structures. Defines common properties.
+
+    ...
+
+    Attributes
+    ----------
+    schema : Schema
+        the schema that this structure is in
+    baseStructureReference : string
+        the reference of the base structure of this structure
+    baseStructure : Structure
+        the base structure of this structure
+    reference : string
+        the reference of this structure
+    isUsed : boolean
+        whether or not this structure is used in the schema
+    metadata : StructureMetadata
+        the metadata for this structure 
+    """
     def __init__(self, reference = ""):
         self.schema = None 
 
@@ -184,16 +226,51 @@ class Structure(object):
         return self.schema.getStructureByReference(self.baseStructureReference)
 
     def setIsUsed(self):
+        """
+        Sets the isUsed property for this structure and the structures it depends on.
+
+        Returns
+        -------
+        None 
+        """
+
         self.isUsed = True 
 
         if self.baseStructure != None:
             self.baseStructure.setIsUsed()
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+
         return {}
 
 
 class DataStructure(Structure):
+    """
+    A class for data structures.
+
+    ...
+
+    Attributes
+    ----------
+    allowedPattern : string
+        a regular expression describing what patterns this data structure can have (if the base type is a string)
+    allowedValues : list
+        a list of the different values that this data structure can have (effectively defining an enumeration); can be a list of strings or numbers
+    minimumValue : number
+        the minimum value (inclusive) that this data structure can have (if the base type is an integer or a decimal)
+    maximumValue : number
+        the maximum value (inclusive) that this data structure can have (if the base type is an integer or a decimal)
+    defaultValue : any
+        the default value that this data structure takes
+    """
+
     def __init__(self, reference = ""):
         super().__init__(reference)
 
@@ -206,8 +283,16 @@ class DataStructure(Structure):
         self.defaultValue = None 
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+
         return {
-            "type":"DataStructure",
+            "type": "DataStructure",
             "baseStructureReference": self.baseStructureReference,
             "reference": self.reference,
             "isUsed": self.isUsed,
@@ -221,6 +306,25 @@ class DataStructure(Structure):
 
 
 class ListFunction(object):
+    """
+    A class that represents a kind of 'meta-data-structure'. If a list function is used in a Schemata file, it means that a data type should be used that is a 
+    list of another data type. Adding list-like data types manually is tedious, as it often involves writing a very complex regular expression - list functions
+    do this automatically in Schemata.
+
+    ...
+
+    Attributes
+    ----------
+    schema : Schema
+        the schema that this list function is in
+    dataStructureReference : string
+        the reference of the data structure that this list function should be a list of
+    dataStructure : DataStructure
+        the data structure that this list function should be a list of 
+    separator : string
+        the character or set of characters that should act as separators in this list - usually a comma or a semi-colon
+    """
+
     def __init__(self, dataStructureReference, separator):
         self.schema = None 
 
@@ -232,11 +336,36 @@ class ListFunction(object):
         return self.schema.getStructureByReference(self.dataStructureReference)
 
     def setIsUsed(self):
+        """
+        Sets the isUsed property for the structure this list function depends on.
+
+        Returns
+        -------
+        None 
+        """
+
         if self.dataStructure != None:
             self.dataStructure.setIsUsed()
 
 
 class AttributeStructure(Structure):
+    """
+    A class for XML attribute structures.
+
+    ...
+
+    Attributes
+    ----------
+    attributeName : string
+        the name of this XML attribute
+    dataStructureReference : string
+        the reference of the data structure that should be used as the value of this attribute
+    dataStructure : DataStructure
+        the data structure that should be used as the value of this attribute
+    defaultValue : any
+        the default value of this attribute; overrides the default value set by the data structure
+    """
+
     def __init__(self, reference = ""):
         super().__init__(reference)
 
@@ -249,14 +378,30 @@ class AttributeStructure(Structure):
         return self.schema.getStructureByReference(self.dataStructureReference)
 
     def setIsUsed(self):
+        """
+        Sets the isUsed property for this structure and the structures it depends on.
+
+        Returns
+        -------
+        None 
+        """
+
         super().setIsUsed()
 
         if self.dataStructure != None:
             self.dataStructure.setIsUsed()
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+
         return {
-            "type":"AttributeStructure",
+            "type": "AttributeStructure",
             "baseStructureReference": self.baseStructureReference,
             "reference": self.reference,
             "isUsed": self.isUsed,
@@ -268,6 +413,53 @@ class AttributeStructure(Structure):
 
 
 class ElementStructure(Structure):
+    """
+    A class for XML element structures.
+
+    ...
+
+    Attributes
+    ----------
+    elementName : string
+        the tag name of this element
+    canBeRootElement : boolean
+        whether or not this element can be the root element of the XML document
+    attributes : list
+        a list of attribute usage references that specify what attributes this element can have
+    allowedContent : a type of UsageReference or StructureList
+        a hierarchical collection of objects defining what elements and data this element can contain
+    valueTypeReference : a string
+        if the content of this element is simply a value - i.e., a data structure - then this is the reference to that data structure
+    valueType : DataStructure
+        if the content of this element is simply a value - i.e., a data structure - then this is that data structure
+    isSelfClosing : boolean
+        whether or not this element should be self-closing; XSD is indifferent to whether elements are self-closing or not; this value
+        is mainly used in the auto-generation of documentation
+    lineBreaks : list of integers
+        how many line breaks there should be before the opening tag, after the opening tag, before the closing tag, and after the closing tag;
+        XSD is indifferent to the formatting of a given XML file; this value is mainly used in the auto-generation of documentation, and could
+        also be used by IDE extensions for auto-formatting
+    hasAttributes : boolean
+        whether or not this element has any allowed attributes; mainly used by the Schemata exporter
+    hasContent : boolean
+        whether or not this element has any allowed content; mainly used by the Schemata exporter
+    containsElementUsageReference : boolean
+        whether or not this element structure contains and element usage references; in short, whether 
+        or not this element can contain other elements; mainly used by the Schemata exporter
+    containsAnyTextUsageReference : boolean
+        whether or not this element structure contains an 'any text' usage reference; in short, whether
+        or not this element can contain any text (rather than a specific text string defined by a data
+        structure); mainly used by the Schemata exporter
+    contentIsAnyText : boolean
+        whether or not this element can contain any text, but no elements; mainly used by the Schemata exporter
+    contentIsSingleValue : boolean
+        whether or not this element is a single value defined by a data structure; mainly used by the Schemata exporter
+    contentIsElementsOnly : boolean
+        whether or not this element can only contain other elements, and no text; mainly used by the Schemata exporter
+    contentIsElementsAndAnyText : boolean
+        whether or not this element is a mixed type - i.e., it can contain a mixture of subelements and 
+        any text; common in HTML-like documents; mainly used by the Schemata exporter
+    """
     def __init__(self, reference = ""):
         super().__init__(reference)
 
@@ -341,6 +533,14 @@ class ElementStructure(Structure):
         return self.schema.getStructureByReference(self.valueTypeReference)
 
     def setIsUsed(self):
+        """
+        Sets the isUsed property for this structure and the structures it depends on.
+
+        Returns
+        -------
+        None 
+        """
+
         super().setIsUsed()
 
         for attributeUsageReference in self.attributes:
@@ -352,8 +552,16 @@ class ElementStructure(Structure):
             self.allowedContent.setIsUsed()
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+
         return {
-            "type":"ElementStructure",
+            "type": "ElementStructure",
             "baseStructureReference": self.baseStructureReference,
             "reference": self.reference,
             "isUsed": self.isUsed,
