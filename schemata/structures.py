@@ -576,6 +576,21 @@ class ElementStructure(Structure):
 
 
 class PropertyStructure(Structure):
+    """
+    A class for JSON property structures.
+
+    ...
+
+    Attributes
+    ----------
+    propertyName : string
+        the name of this JSON property
+    valueTypeReference : string
+        the reference of the structure that the value of this property should be
+    valueType : Structure
+        the structure that the value of this property should be; can be a data structure, an array structure, or an object structure
+    """
+
     def __init__(self, reference = ""):
         super().__init__(reference)
 
@@ -587,14 +602,30 @@ class PropertyStructure(Structure):
         return self.schema.getStructureByReference(self.valueTypeReference)
 
     def setIsUsed(self):
+        """
+        Sets the isUsed property for this structure and the structures it depends on.
+
+        Returns
+        -------
+        None 
+        """
+
         super().setIsUsed()
 
         if self.valueType != None:
             self.valueType.setIsUsed()
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+
         return {
-            "type":"PropertyStructure",
+            "type": "PropertyStructure",
             "baseStructureReference": self.baseStructureReference,
             "reference": self.reference,
             "isUsed": self.isUsed,
@@ -604,6 +635,18 @@ class PropertyStructure(Structure):
 
 
 class ArrayStructure(Structure):
+    """
+    A class for JSON array structures.
+
+    ...
+
+    Attributes
+    ----------
+    itemTypeReference : string
+        the reference to the structure that all of the items of this array conform to
+    itemType : Structure
+        the structure that all of the items of this array conform to; can be a data structure, an array structure, or an object structure
+    """
     def __init__(self, reference = ""):
         super().__init__(reference)
 
@@ -614,14 +657,30 @@ class ArrayStructure(Structure):
         return self.schema.getStructureByReference(self.itemTypeReference)
 
     def setIsUsed(self):
+        """
+        Sets the isUsed property for this structure and the structures it depends on.
+
+        Returns
+        -------
+        None 
+        """
+
         super().setIsUsed()
 
         if self.itemType != None:
             self.itemType.setIsUsed()
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+
         return {
-            "type":"ArrayStructure",
+            "type": "ArrayStructure",
             "baseStructureReference": self.baseStructureReference,
             "reference": self.reference,
             "isUsed": self.isUsed ,
@@ -631,6 +690,19 @@ class ArrayStructure(Structure):
 
 
 class ObjectStructure(Structure):
+    """
+    A class for JSON object structures.
+
+    ...
+
+    Attributes
+    ----------
+    canBeRootObject : boolean
+        whether or not this object structure can be the root object of the JSON document
+    properties : list
+        a list of property usage references that defines the properties this object can have
+    
+    """
     def __init__(self, reference = ""):
         super().__init__(reference)
 
@@ -638,14 +710,30 @@ class ObjectStructure(Structure):
         self.properties = []
 
     def setIsUsed(self):
+        """
+        Sets the isUsed property for this structure and the structures it depends on.
+
+        Returns
+        -------
+        None 
+        """
+
         super().setIsUsed()
 
         for propertyUsageReference in self.properties:
             propertyUsageReference.propertyStructure.setIsUsed()
 
     def toJSON(self):
+        """
+        Converts this object to a dictionary, which can then be easily exported as JSON. Used for development purposes.
+
+        Returns
+        -------
+        A dictionary representing this object.
+        """
+
         return {
-            "type":"ObjectStructure",
+            "type": "ObjectStructure",
             "baseStructureReference": self.baseStructureReference,
             "reference": self.reference,
             "isUsed": self.isUsed,
