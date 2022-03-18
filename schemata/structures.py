@@ -3,6 +3,22 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+"""
+This module contains the core classes for Schemata.
+
+There are, broadly, three categories of class here.
+
+The first is the Schema class, which simply represents the entire schema. It contains all of the structures.
+
+The second is structure classes. A Schemata document consists of a set of different kinds of structures.
+A structure might define an XML element, or an XML attribute, or a JSON object, and so on.
+
+The third is usage references. A usage reference defines how one structure uses another structure. For example,
+an element structure might want to refer to a number of attribute structures that it uses. However, these
+attribute structures might be optional in this context, or have different default values to usual. This is what
+the usage reference defines.
+"""
+
 
 class Schema(object):
     """
@@ -1130,7 +1146,7 @@ class StructureChoice(StructureList):
         -------
         A dictionary representing this object.
         """
-        
+
         return {
             "type": "StructureChoice",
             "structures": [structure.toJSON() for structure in self.structures]

@@ -8,6 +8,16 @@ from structures import *
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+"""
+This module contains the Schemata parser.
+
+This module contains the code that takes Schemata syntax - a relatively compact syntax - and turns it into
+a set of objects representing the schema. From there, the schema can be exported to XSD, or Schematron, or
+JSON Schemas, or auto-generated documentation, depending on what's relevant.
+
+The parsing is done completely in one step. The parser scans the document and constructs the objects in one go.
+"""
+
 
 class Marker(object):
     def __init__(self):
