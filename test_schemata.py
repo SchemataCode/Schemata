@@ -1,6 +1,6 @@
 import unittest
 from parameterized import parameterized
-from schemata import *
+from schemata.parser import *
 
 
 class TestParsing(unittest.TestCase):

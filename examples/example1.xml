@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<books>
+    <book id="the_fellowship_of_the_ring">
+        <title>The Fellowship of the Ring</title>
+        <subtitle>The Lord of the Rings, Book 1</subtitle>
+        <isbn>0261103571</isbn>
+    </book>
+    <book id="pride_and_prejudice">
+        <title>Pride and Prejudice</title>
+        <subtitle></subtitle>
+        <isbn>9780141040349</isbn>
+    </book>
+    <book id="a_game_of_thrones">
+        <title>A Game of Thrones</title>
+        <subtitle>A Song of Ice and Fire, Book 1</subtitle>
+        <isbn>9780006479888</isbn>
+    </book>
+</books>

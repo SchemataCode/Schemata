@@ -1,0 +1,29 @@
+root element books {
+    allowedContent: [ book (n >= 0) ];
+}
+
+dataType _id {
+    baseType: string;
+    allowedPattern: '[A-Za-z0-9_]+';
+}
+
+attribute id {
+    valueType: _id;
+}
+
+element book {
+    attributes: id;
+    allowedContent: [ title, subtitle (optional), isbn ];
+}
+
+element title {
+    allowedContent: *any text*;
+}
+
+element subtitle {
+    allowedContent: *any text*;
+}
+
+element isbn {
+    allowedContent: *any text*;
+}
