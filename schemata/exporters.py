@@ -193,6 +193,22 @@ class JSONSchemasExporter(object):
 
 
 class XSDExporter(object):
+    """
+    A class that takes a Schemata schema and exports it to the XSD format.
+
+    ...
+
+    Attributes
+    ----------
+    _xs : string
+        The value of xmlns:xs. Do not change.
+    _typePrefix : string
+        XSD allows the definition of reusable types. This exporter takes full advantage of that, as it's an approach that
+        closely matches how Schemata works, making the export easier. This string is a prefix that's applied to type names
+        in the XSD, to distinguish them easily from other kinds of elements. You can change this if you want, but there's
+        not much point. Set to '__type__' by default.
+    """
+
     def __init__(self):
         self._xs = "http://www.w3.org/2001/XMLSchema"
         self._typePrefix = "__type__"
@@ -207,7 +223,24 @@ class XSDExporter(object):
 
         raise Exception("Cannot create XSD type name for {}.".format(structure.reference))
 
-    def exportSchema(self, schema, versionNumber, filePath):
+    def exportSchema(self, schema, versionNumber, filePath = ""):
+        """
+        Exports a schema as XSD, saving it to the given file path.
+
+        Parameters
+        ----------
+        schema : Schema
+            The schema to export.
+        versionNumber : string
+            The version number of the schema.
+        filePath : string
+            The path to which to save the XSD file. Use an empty string to indicate that the XSD object should not be saved to a file.
+
+        Returns
+        -------
+        An ElementTree which is the XSD schema.
+        """
+
         xs = self._xs
 
         logging.debug("Exporting schema for {} as XSD.".format(schema.formatName))
@@ -215,16 +248,19 @@ class XSDExporter(object):
         e1 = XMLElement(QName(xs, "schema"))
         e1.set("elementFormDefault", "qualified")
 
+        # Put a comment at the top of the XSD file saying what XML format it's for.
         if schema.formatName != "":
             c1 = XMLComment(" An XSD file for {} ({}). ".format(schema.formatName, versionNumber))
 
             e1.append(c1)
 
+        # First export all of the data structures, as these are more basic, and then export all of the element structures.
         self._exportDataStructures(schema, e1)
         self._exportElementStructures(schema, e1)
 
         logging.debug("Exporting root elements.")
 
+        # The root element structures are exported last. This means that the output XSD file should be 'read' in reverse.
         roots = schema.getRootElementStructures()
 
         for root in roots:
@@ -238,9 +274,28 @@ class XSDExporter(object):
 
         tree = XMLElementTree(e1)
         indent(tree, space="    ")
-        tree.write(filePath, xml_declaration=True, encoding="utf-8", pretty_print=True)
+
+        if filePath != "":
+            tree.write(filePath, xml_declaration=True, encoding="utf-8", pretty_print=True)
+
+        return tree 
 
     def _exportDataStructures(self, schema, xsdElement):
+        """
+        Exports all of the data structures in the schema.
+
+        Parameters
+        ----------
+        schema : Schema
+            The schema being exported.
+        xsdElement : Element
+            The XML element to which to attach these data structures.
+
+        Returns
+        -------
+        None 
+        """
+
         xs = self._xs 
 
         logging.debug("Exporting data structures.")
@@ -248,6 +303,7 @@ class XSDExporter(object):
         dataStructures = schema.getDataStructures()
 
         for dataStructure in dataStructures:
+            # If a data structure isn't actually used in the schema, don't export it.
             if not dataStructure.isUsed:
                 continue 
 
@@ -321,7 +377,6 @@ class XSDExporter(object):
 
                 e1.append(e2)
 
-
             xsdElement.append(e1)
 
             logging.debug("Exported data structure '{}'.".format(dataStructure.reference))
@@ -329,6 +384,21 @@ class XSDExporter(object):
         logging.debug("Exported data structures.")
     
     def _exportElementStructures(self, schema, xsdElement):
+        """
+        Exports all of the element structures in the schema.
+
+        Parameters
+        ----------
+        schema : Schema
+            The schema being exported.
+        xsdElement : Element
+            The XML element to which to attach these element structures.
+
+        Returns
+        -------
+        None 
+        """
+
         xs = self._xs 
 
         logging.debug("Exporting element structures.")
@@ -336,11 +406,13 @@ class XSDExporter(object):
         elementStructures = schema.getElementStructures()
 
         for elementStructure in elementStructures:
+            # If the element structure isn't actually used in the schema (i.e., it isn't defined as a possible root element or subelement of another element), don't export it.
             if not elementStructure.isUsed:
                 continue 
 
             logging.debug("Exporting element structure '{}' <{}>.".format(elementStructure.reference, elementStructure.elementName))
 
+            # Here we decide whether the element is a 'simpleType' element or a 'complexType' element - it's quite an unintuitive distinction.
             if not elementStructure.hasContent:
 
                 e1 = XMLElement(QName(xs, "complexType"))
@@ -446,10 +518,33 @@ class XSDExporter(object):
                 logging.warn("Could not export element structure '{}' <{}>.".format(elementStructure.reference, elementStructure.elementName))
 
     def _exportSubelements(self, schema, elements, xsdElement):
+        """
+        Exports a structure list to XSD.
+
+        Parameters
+        ----------
+        schema : Schema
+            The schema being exported.
+        elements : StructureList
+            The structure list being exported (representing the subelements of an element).
+        xsdElement : Element
+            The XML element to which to attach this list.
+
+        Returns
+        -------
+        None 
+        """
+
         xs = self._xs 
 
         xsdIndicatorType = "sequence"
 
+        # Schemata uses a bit more natural language when it comes to lists of elements than XSD does.
+        # Here we have to translate from the language of Schemata to the language of XSD.
+        # OrderedStructureList correlates clearly to an XSD sequence.
+        # StructureChoice correlates clearly to an XSD choice.
+        # UnorderedStructureList can be represented by an XSD choice that can be used any number of times. (This is not perfect.)
+        # This here is one of the reasons why Schemata is nicer to use than XSD - this is a pain to do by hand in XSD.
         if isinstance(elements, OrderedStructureList):
             e1 = XMLElement(QName(xs, "sequence"))
         if isinstance(elements, UnorderedStructureList):
@@ -493,6 +588,23 @@ class XSDExporter(object):
         xsdElement.append(e1)
 
     def _exportAttributes(self, schema, attributes, xsdElement):
+        """
+        Exports the given attribute structures to XSD.
+
+        Parameters
+        ----------
+        schema : Schema
+            The schema being exported.
+        attributes : list of AttributeStructure
+            The attribute structures being exported.
+        xsdElement : Element
+            The XML element to which to attach these attribute structures.
+
+        Returns
+        -------
+        None 
+        """
+
         xs = self._xs 
         baseTypes = ["string", "integer", "boolean"]
 
@@ -515,7 +627,6 @@ class XSDExporter(object):
             e1.set("use", "optional" if attribute.isOptional else "required")
 
             xsdElement.append(e1)
-
 
 
 def generateSpecification(schema, filePath):
