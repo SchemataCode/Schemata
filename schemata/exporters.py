@@ -629,99 +629,124 @@ class XSDExporter(object):
             xsdElement.append(e1)
 
 
-def generateSpecification(schema, filePath):
-    with open(filePath, "w") as fileObject:
+class SpecificationGenerator(object):
+    """
+    A class for generating specifications / human-readable documentation from Schemata schemas. The generated documents are in Markdown. The generation is not perfect, but it 
+    makes the process of writing a specification / human-readable documentation a lot quicker.
 
-        rootElements = schema.getPossibleRootElementStructures()
-        nonRootElements = schema.getNonRootElementStructures()
-        elements = rootElements + nonRootElements 
+    To do:
 
-        fileObject.write("# {} Specification\n\n".format(schema.formatName))
-        fileObject.write("This document gives the specification for {}.\n\n".format(schema.formatName))
+    This only works for XML schemas at the moment - need to extend it to JSON schemas.
+    Would be nice to be able to generate documentation in HTML as well as Markdown.
+    """
 
-        fileObject.write("## Table of Contents\n\n")
+    def __init__(self):
+        pass 
 
-        for element in elements:
-            fileObject.write("- [The &lt;{}&gt; element](#the-{}-element)\n".format(element.elementName, re.sub("_", "-", element.elementName)))
+    def generateSpecification(self, schema, filePath):
+        with open(filePath, "w") as fileObject:
 
-        for element in elements:
-            fileObject.write("\n\n<br /><br />\n\n")
-            fileObject.write("## The &lt;{}&gt; element\n\n".format(element.elementName))
-            fileObject.write("{}\n\n".format(element.description.replace("<", "&lt;").replace(">", "&gt;")))
-            fileObject.write("### Attributes\n\n")
+            rootElements = schema.getPossibleRootElementStructures()
+            nonRootElements = schema.getNonRootElementStructures()
+            elements = rootElements + nonRootElements 
 
-            aa = []
+            fileObject.write("# {} Specification\n\n".format(schema.formatName))
+            fileObject.write("This document gives the specification for {}.\n\n".format(schema.formatName))
 
-            if element.attributes:
-                fileObject.write("| Name | Required | Allowed Values | Description |\n")
-                fileObject.write("|---|---|---|---|\n")
+            fileObject.write("## Table of Contents\n\n")
 
-                for attribute in element.attributes:
-                    a = schema.getAttributeStructureByReference(attribute.attributeReference)
-                    d = schema.getDataStructureByReference(a.dataStructure)
-                    aa.append(a)
+            for element in elements:
+                fileObject.write("- [The &lt;{}&gt; element](#the-{}-element)\n".format(element.elementName, re.sub("_", "-", element.elementName)))
 
-                    allowedValuesText = d.description
+            for element in elements:
+                fileObject.write("\n\n<br /><br />\n\n")
+                fileObject.write("## The &lt;{}&gt; element\n\n".format(element.elementName))
+                fileObject.write("{}\n\n".format(element.description.replace("<", "&lt;").replace(">", "&gt;")))
+                fileObject.write("### Attributes\n\n")
 
-                    if d.allowedValues and d.description == "":
-                        allowedValuesText = "one of: {}".format(", ".join(["`{}`".format(v) for v in d.allowedValues]))
-                    elif d.allowedPattern and d.description == "" and d.baseStructure == "string":
-                        allowedValuesText = f"a string with the pattern `{d.allowedPattern}`"
+                aa = []
 
-                    fileObject.write("| `{}` | {} | {} | {} |\n".format(a.attributeName, "Required" if not attribute.isOptional else "Optional", allowedValuesText, a.description))
+                if element.attributes:
+                    fileObject.write("| Name | Required | Allowed Values | Description |\n")
+                    fileObject.write("|---|---|---|---|\n")
 
-                fileObject.write("\n")
+                    for attribute in element.attributes:
+                        a = schema.getAttributeStructureByReference(attribute.attributeReference)
+                        d = schema.getDataStructureByReference(a.dataStructure)
+                        aa.append(a)
 
-            else:
-                fileObject.write("None\n\n")
+                        allowedValuesText = d.description
 
-            fileObject.write("### Possible Subelements\n\n")
+                        if d.allowedValues and d.description == "":
+                            allowedValuesText = "one of: {}".format(", ".join(["`{}`".format(v) for v in d.allowedValues]))
+                        elif d.allowedPattern and d.description == "" and d.baseStructure == "string":
+                            allowedValuesText = f"a string with the pattern `{d.allowedPattern}`"
 
-            ee = []
+                        fileObject.write("| `{}` | {} | {} | {} |\n".format(a.attributeName, "Required" if not attribute.isOptional else "Optional", allowedValuesText, a.description))
 
-            if element.subelements:
-                for subelement in element.subelements.elements:
-                    e = schema.getElementStructureByReference(subelement.elementReference)
-                    ee.append(e)
+                    fileObject.write("\n")
 
-                    fileObject.write("- &lt;{}&gt;\n".format(e.elementName))
-
-                fileObject.write("\n")
-
-            else:
-                fileObject.write("None\n\n")
-
-            fileObject.write("### Examples\n\n")
-            fileObject.write("Below is shown an example of the `<{}>` element.\n\n".format(element.elementName))
-            fileObject.write("```xml\n")
-
-            attributeString = " ".join(["{}=\"{}\"".format(a.attributeName, "..." if a.exampleValue == "" else a.exampleValue) for a in aa])
-
-            if element.isSelfClosing == False:
-                if aa:
-                    fileObject.write("<{} {}>\n".format(element.elementName, attributeString))
                 else:
-                    fileObject.write("<{}>\n".format(element.elementName))
+                    fileObject.write("None\n\n")
 
-                if element.allowedContent == "text only":
-                    fileObject.write("    {}\n".format(element.exampleValue))
+                fileObject.write("### Possible Subelements\n\n")
+
+                ee = []
+
+                if element.subelements:
+                    for subelement in element.subelements.elements:
+                        e = schema.getElementStructureByReference(subelement.elementReference)
+                        ee.append(e)
+
+                        fileObject.write("- &lt;{}&gt;\n".format(e.elementName))
+
+                    fileObject.write("\n")
+
                 else:
-                    for e in ee:
-                        if e.isSelfClosing == False:
-                            fileObject.write("    <{}></{}>\n".format(e.elementName, e.elementName))
-                        else:
-                            fileObject.write("    <{} />\n".format(e.elementName, e.elementName))
+                    fileObject.write("None\n\n")
 
-                fileObject.write("</{}>\n".format(element.elementName))
-            else:
-                if aa:
-                    fileObject.write("<{} {} />\n".format(element.elementName, attributeString))
+                fileObject.write("### Examples\n\n")
+                fileObject.write("Below is shown an example of the `<{}>` element.\n\n".format(element.elementName))
+                fileObject.write("```xml\n")
+
+                attributeString = " ".join(["{}=\"{}\"".format(a.attributeName, "..." if a.exampleValue == "" else a.exampleValue) for a in aa])
+
+                if element.isSelfClosing == False:
+                    if aa:
+                        fileObject.write("<{} {}>\n".format(element.elementName, attributeString))
+                    else:
+                        fileObject.write("<{}>\n".format(element.elementName))
+
+                    if element.allowedContent == "text only":
+                        fileObject.write("    {}\n".format(element.exampleValue))
+                    else:
+                        for e in ee:
+                            if e.isSelfClosing == False:
+                                fileObject.write("    <{}></{}>\n".format(e.elementName, e.elementName))
+                            else:
+                                fileObject.write("    <{} />\n".format(e.elementName, e.elementName))
+
+                    fileObject.write("</{}>\n".format(element.elementName))
                 else:
-                    fileObject.write("<{} />\n".format(element.elementName))
+                    if aa:
+                        fileObject.write("<{} {} />\n".format(element.elementName, attributeString))
+                    else:
+                        fileObject.write("<{} />\n".format(element.elementName))
 
-            fileObject.write("```\n\n")
+                fileObject.write("```\n\n")
+
 
 class ExampleFileGenerator(object):
+    """
+    A class for generating example files that conform to a given schema.
+
+    ...
+
+    To do:
+
+    At the moment this only works for XML schemas - would be nice to get this working for JSON schemas too.
+    Would be nice to get this generating invalid XML files too, for automatic testing of schemas.
+    """
     def __init__(self):
         pass 
 
@@ -827,6 +852,26 @@ def exportSchemaAsJSONSchema(schema, versionNumber, filePath):
 
     jsonSchemasExporter = JSONSchemasExporter()
     jsonSchemasExporter.exportSchema(schema, versionNumber, filePath)
+
+def generateSpecification(schema, filePath):
+    """
+    Generates a specification / human-readable documentation for the given schema. Some manual editing will be required,
+    but this function can save a lot of time.
+
+    Parameters
+    ----------
+    schema : Schema
+        The schema to create a specification for.
+    filePath : string
+        The file path to which to save the specification.
+
+    Returns
+    -------
+    None
+    """
+
+    specificationGenerator = SpecificationGenerator()
+    specificationGenerator.generateSpecification(schema, filePath)
 
 def generateExampleXMLFiles(schema, folderPath):
     """
