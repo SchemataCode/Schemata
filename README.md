@@ -272,6 +272,14 @@ Schemata is based around the concept of **structures**. XML schemas can be defin
 
 Thinking in these terms, we can see that a Schemata file is ultimately just a list of structures. The structures can refer to each other and include each other, but the file is ultimately just a one-dimensional list.
 
+## Installation
+
+Schemata is available on PyPI. Install it with the following command.
+
+```bash
+pip install schematacode 
+```
+
 ## Credits
 
 Made by B. T. Milnes for Nagwa Limited
