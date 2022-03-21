@@ -224,7 +224,43 @@ element isbn {
 }
 ```
 
-This schema, when put through the Schemata code, would produce an XSD file that describes the XML file we started with.
+This schema, when put through the Schemata code, produces the following XSD file.
+
+```xml
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:simpleType name="__type__d___id">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[A-Za-z0-9_]+"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="__type__e__books" mixed="false">
+        <xs:sequence>
+            <xs:element name="book" type="__type__e__book" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="__type__e__book" mixed="false">
+        <xs:sequence>
+            <xs:element name="title" type="__type__e__title"/>
+            <xs:element name="subtitle" type="__type__e__subtitle" minOccurs="0"/>
+            <xs:element name="isbn" type="__type__e__isbn"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="__type__d___id" use="required"/>
+    </xs:complexType>
+    <xs:simpleType name="__type__e__title">
+        <xs:restriction base="xs:string"/>
+    </xs:simpleType>
+    <xs:simpleType name="__type__e__subtitle">
+        <xs:restriction base="xs:string"/>
+    </xs:simpleType>
+    <xs:simpleType name="__type__e__isbn">
+        <xs:restriction base="xs:string"/>
+    </xs:simpleType>
+    <xs:element name="books" type="__type__e__books"/>
+</xs:schema>
+```
+
+The XML file we started with passes validation against this XSD file.
 
 There are many features which have not been covered in this introduction. 
 
