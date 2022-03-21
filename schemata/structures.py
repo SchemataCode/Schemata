@@ -1,7 +1,6 @@
 import logging 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger = logging.getLogger("schemata.structures")
 
 """
 This module contains the core classes for Schemata.

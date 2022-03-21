@@ -5,23 +5,52 @@ from lxml.etree import ElementTree as XMLElementTree, Element as XMLElement, Sub
 import json 
 from structures import * 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-
+logger = logging.getLogger("schemata.exporters")
 
 
 class JSONSchemasExporter(object):
+    """
+    This class takes a Schemata schema and exports it into the JSON Schemas format.
+
+    To do:
+
+    This class does not implement *every* feature of JSON Schemas yet, as it has been developed for a very specific use-case.
+
+    ...
+
+    Attributes
+    ----------
+    _js : string
+        The JSON Schemas specification being used. This is the value of the $schema property. Do not change. 
+    """
     def __init__(self):
         self._js = "https://json-schema.org/draft/2020-12/schema"
-        self._id = ""
 
-    def exportSchema(self, schema, versionNumber, filePath):
+    def exportSchema(self, schema, versionNumber, schemaURI, filePath = ""):
+        """
+        Constructs the root JSON object for a JSON Schemas export of the given schema, and saves it to the given file path.
+
+        Parameters
+        ----------
+        schema : Schema
+            The schema to export.
+        versionNumber : string
+            The version number of this schema. Can follow any convention you like.
+        schemaURI : string
+            A URI to this schema.
+        filePath : string
+            The path to which to save the output. Use an empty string to indicate that the output should not be saved as a file.
+
+        Returns
+        -------
+        The JSON object.
+        """
+
         logging.debug("Exporting schema for {} as JSON Schema.".format(schema.formatName))
 
         o1 = {}
         o1["$schema"] = self._js 
-        o1["$id"] = self._id 
+        o1["$id"] = schemaURI 
         o1["title"] = "{} ({})".format(schema.formatName, versionNumber)
         o1["type"] = "object"
 
@@ -29,20 +58,42 @@ class JSONSchemasExporter(object):
 
         self._exportObject(schema, rootObject, o1)
 
-        with open(filePath, "w") as fo:
-            json.dump(o1, fo, indent=4)
+        if filePath != "":
+            with open(filePath, "w") as fo:
+                json.dump(o1, fo, indent=4)
+
+        return o1 
 
     def _exportArray(self, schema, _array, jsonObject):
+        """
+        Internal function. Exports an array structure to the JSON Schemas format.
+
+        Parameters
+        ----------
+        schema : Schema
+            The schema being exported.
+        _array : ArrayStructure
+            The array structure being exported.
+        jsonObject : dictionary
+            The dictionary / JSON object to which to attach this array.
+
+        Returns
+        -------
+        None
+        """
+
+        logger.debug("Exporting array structure {}.".format(_array.reference))
+
         jsonObject["type"] = "array"
 
         if _array.itemTypeReference == "string":
-            jsonObject["items"] = {"type":"string"}
+            jsonObject["items"] = {"type": "string"}
         elif _array.itemTypeReference == "integer":
-            jsonObject["items"] = {"type":"integer"}
+            jsonObject["items"] = {"type": "integer"}
         elif _array.itemTypeReference == "decimal":
-            jsonObject["items"] = {"type":"decimal"}
+            jsonObject["items"] = {"type": "decimal"}
         elif _array.itemTypeReference == "boolean":
-            jsonObject["items"] = {"type":"boolean"}
+            jsonObject["items"] = {"type": "boolean"}
         elif isinstance(_array.itemType, DataStructure):
             ds = _array.itemType
 
@@ -57,6 +108,25 @@ class JSONSchemasExporter(object):
                     jsonObject["items"]["enum"] = ds.allowedValues
 
     def _exportObject(self, schema, _object, jsonObject):
+        """
+        Internal function. Exports an object structure to the JSON Schemas format.
+
+        Parameters
+        ----------
+        schema : Schema
+            The schema being exported.
+        _object : ObjectStructure
+            The object structure being exported.
+        jsonObject : dictionary
+            The dictionary / JSON object to which to attach this array.
+
+        Returns
+        -------
+        None
+        """
+
+        logger.debug("Exporting object structure {}.".format(_object.reference))
+
         jsonObject["type"] = "object"
         jsonObject["properties"] = {}
         jsonObject["required"] = []
@@ -74,6 +144,25 @@ class JSONSchemasExporter(object):
                 jsonObject["required"].append(pn)
 
     def _exportProperty(self, schema, _property, jsonObject):
+        """
+        Internal function. Exports a property structure to the JSON Schemas format.
+
+        Parameters
+        ----------
+        schema : Schema
+            The schema being exported.
+        _property : PropertyStructure
+            The property structure being exported.
+        jsonObject : dictionary
+            The dictionary / JSON object to which to attach this array.
+
+        Returns
+        -------
+        None
+        """
+
+        logger.debug("Exporting property structure {}.".format(_property.reference))
+
         if _property.valueTypeReference == "string":
             jsonObject["type"] = "string"
         elif _property.valueTypeReference == "integer":
@@ -102,7 +191,6 @@ class JSONSchemasExporter(object):
 
             self._exportObject(schema, _os, jsonObject)
 
-        
 
 class XSDExporter(object):
     def __init__(self):
@@ -430,17 +518,6 @@ class XSDExporter(object):
 
 
 
-
-xsdExporter = XSDExporter()
-
-def exportSchemaAsXSD(schema, versionNumber, filePath):
-    xsdExporter.exportSchema(schema, versionNumber, filePath) 
-
-jsonSchemasExporter = JSONSchemasExporter()
-
-def exportSchemaAsJSONSchema(schema, versionNumber, filePath):
-    jsonSchemasExporter.exportSchema(schema, versionNumber, filePath)
-
 def generateSpecification(schema, filePath):
     with open(filePath, "w") as fileObject:
 
@@ -592,4 +669,70 @@ class ExampleFileGenerator(object):
 
                         e1.append(e2)
 
-exampleFileGenerator = ExampleFileGenerator()
+
+"""
+Functions that allow you to do the export process in a single line.
+Best not to use these if you're going to export a large number of schemas.
+"""
+
+def exportSchemaAsXSD(schema, versionNumber, filePath):
+    """
+    Exports the given schema as an XSD document.
+
+    Parameters
+    ----------
+    schema : Schema
+        The schema to export.
+    versionNumber : string
+        The version number of the schema.
+    filePath : string
+        The path to which to save the XSD file.
+
+    Returns
+    -------
+    None
+    """
+
+    xsdExporter = XSDExporter()
+    xsdExporter.exportSchema(schema, versionNumber, filePath) 
+
+def exportSchemaAsJSONSchema(schema, versionNumber, filePath):
+    """
+    Exports the given schema as a JSON Schemas document.
+
+    Parameters
+    ----------
+    schema : Schema
+        The schema to export.
+    versionNumber : string
+        The version number of the schema.
+    filePath : string
+        The path to which to save the JSON Schemas file.
+
+    Returns
+    -------
+    None
+    """
+
+    jsonSchemasExporter = JSONSchemasExporter()
+    jsonSchemasExporter.exportSchema(schema, versionNumber, filePath)
+
+def generateExampleXMLFiles(schema, folderPath):
+    """
+    Generates example XML files for the given schema. Some manual editing will be required, but this function
+    can save time at the start of defining a new format. 
+
+    Parameters
+    ----------
+    schema : Schema
+        The schema to create example files for.
+    folderPath : string
+        The folder to which to save the example files.
+
+    Returns
+    -------
+    None
+    """
+
+    exampleFileGenerator = ExampleFileGenerator()
+    exampleFileGenerator.generateExampleFiles(schema, folderPath)

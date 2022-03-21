@@ -5,8 +5,7 @@ from lxml.etree import ElementTree as XMLElementTree, Element as XMLElement, Sub
 import json 
 from structures import * 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger = logging.getLogger("schemata.parser")
 
 """
 This module contains the Schemata parser.
