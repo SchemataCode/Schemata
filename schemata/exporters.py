@@ -3,7 +3,7 @@ import logging
 import re
 from lxml.etree import ElementTree as XMLElementTree, Element as XMLElement, SubElement as XMLSubelement, Comment as XMLComment, QName, indent 
 import json 
-from structures import * 
+from schemata.structures import * 
 
 logger = logging.getLogger("schemata.exporters")
 
