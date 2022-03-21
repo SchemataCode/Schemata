@@ -1,3 +1,7 @@
+/*
+Format Name: Book List XML
+*/
+
 root element books {
     allowedContent: [ book (n >= 0) ];
 }

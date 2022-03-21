@@ -268,10 +268,9 @@ There are many features which have not been covered in this introduction.
 
 The ease-of-reading and intuitiveness of the Schemata syntax should be apparent. The syntax is superficially similar to that of CSS, which many developers are familiar with. Much of the 'heavy-lifting' of the mark-up is done by brackets, colons, and semi-colons, as opposed to opening and closing XML tags.
 
-Schemata is based around the concept of **structures**. XML schemas can be defined in terms of element, attribute, and data structures. JSON schemas can be defined in terms of object, property, array, and data structures.
+Schemata is based around the concept of **structures**. XML schemas can be defined in terms of element, attribute, and data structures. JSON schemas can be defined in terms of object, property, array, and data structures. Really, any collection of data can be described in terms of the structures that make it up.
 
-
-
+Thinking in these terms, we can see that a Schemata file is ultimately just a list of structures. The structures can refer to each other and include each other, but the file is ultimately just a one-dimensional list.
 
 ## Credits
 
