@@ -1,0 +1,172 @@
+{
+    "formatName": "",
+    "structures": [
+        {
+            "type": "ElementStructure",
+            "baseStructureReference": "",
+            "reference": "books",
+            "isUsed": true,
+            "metadata": {
+                "description": "",
+                "exampleValue": ""
+            },
+            "elementName": "books",
+            "canBeRootElement": true,
+            "attributes": [],
+            "allowedContent": {
+                "type": "OrderedStructureList",
+                "structures": [
+                    {
+                        "elementStructureReference": "book",
+                        "minimumNumberOfOccurrences": 0,
+                        "maximumNumberOfOccurrences": -1
+                    }
+                ]
+            },
+            "isSelfClosing": false,
+            "lineBreaks": [
+                0,
+                1,
+                1,
+                1
+            ]
+        },
+        {
+            "type": "DataStructure",
+            "baseStructureReference": "string",
+            "reference": "_id",
+            "isUsed": true,
+            "metadata": {
+                "description": "",
+                "exampleValue": ""
+            },
+            "allowedPattern": "[A-Za-z0-9_]+",
+            "allowedValues": [],
+            "minimumValue": null,
+            "maximumValue": null,
+            "defaultValue": null
+        },
+        {
+            "type": "AttributeStructure",
+            "baseStructureReference": "",
+            "reference": "id",
+            "isUsed": true,
+            "metadata": {
+                "description": "",
+                "exampleValue": ""
+            },
+            "attributeName": "id",
+            "dataStructureReference": "_id",
+            "defaultValue": null
+        },
+        {
+            "type": "ElementStructure",
+            "baseStructureReference": "",
+            "reference": "book",
+            "isUsed": true,
+            "metadata": {
+                "description": "",
+                "exampleValue": ""
+            },
+            "elementName": "book",
+            "canBeRootElement": false,
+            "attributes": [
+                {
+                    "attributeStructureReference": "id",
+                    "isOptional": false,
+                    "defaultValue": null
+                }
+            ],
+            "allowedContent": {
+                "type": "OrderedStructureList",
+                "structures": [
+                    {
+                        "elementStructureReference": "title",
+                        "minimumNumberOfOccurrences": 1,
+                        "maximumNumberOfOccurrences": 1
+                    },
+                    {
+                        "elementStructureReference": "subtitle",
+                        "minimumNumberOfOccurrences": 0,
+                        "maximumNumberOfOccurrences": 1
+                    },
+                    {
+                        "elementStructureReference": "isbn",
+                        "minimumNumberOfOccurrences": 1,
+                        "maximumNumberOfOccurrences": 1
+                    }
+                ]
+            },
+            "isSelfClosing": false,
+            "lineBreaks": [
+                0,
+                1,
+                1,
+                1
+            ]
+        },
+        {
+            "type": "ElementStructure",
+            "baseStructureReference": "",
+            "reference": "title",
+            "isUsed": true,
+            "metadata": {
+                "description": "",
+                "exampleValue": ""
+            },
+            "elementName": "title",
+            "canBeRootElement": false,
+            "attributes": [],
+            "allowedContent": {},
+            "isSelfClosing": false,
+            "lineBreaks": [
+                0,
+                1,
+                1,
+                1
+            ]
+        },
+        {
+            "type": "ElementStructure",
+            "baseStructureReference": "",
+            "reference": "subtitle",
+            "isUsed": true,
+            "metadata": {
+                "description": "",
+                "exampleValue": ""
+            },
+            "elementName": "subtitle",
+            "canBeRootElement": false,
+            "attributes": [],
+            "allowedContent": {},
+            "isSelfClosing": false,
+            "lineBreaks": [
+                0,
+                1,
+                1,
+                1
+            ]
+        },
+        {
+            "type": "ElementStructure",
+            "baseStructureReference": "",
+            "reference": "isbn",
+            "isUsed": true,
+            "metadata": {
+                "description": "",
+                "exampleValue": ""
+            },
+            "elementName": "isbn",
+            "canBeRootElement": false,
+            "attributes": [],
+            "allowedContent": {},
+            "isSelfClosing": false,
+            "lineBreaks": [
+                0,
+                1,
+                1,
+                1
+            ]
+        }
+    ]
+}
